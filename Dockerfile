@@ -4,6 +4,15 @@
 # ships. Works unchanged on Render, Railway, Fly.io and any other container host.
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+
+# .NET watches files with inotify by default. Container hosts cap inotify instances per
+# user across every container on the node, so on a busy host the app dies with
+# "The configured user limit (128) on the number of inotify instances has been reached".
+# Polling costs one background thread and fixes it outright; disabling config reload alone
+# does not, because Razor and MVC register watchers of their own regardless.
+# See https://github.com/dotnet/aspnetcore/issues/3475
+ENV DOTNET_USE_POLLING_FILE_WATCHER=1
+
 WORKDIR /src
 
 # Restore first, on its own layer, so a source-only change does not re-download packages.
@@ -26,6 +35,8 @@ RUN mkdir -p /app/App_Data
 VOLUME ["/app/App_Data"]
 
 ENV ASPNETCORE_ENVIRONMENT=Production
+# Same inotify story as in the build stage — this is the one that matters at runtime.
+ENV DOTNET_USE_POLLING_FILE_WATCHER=1
 # PORT is honoured at startup (see Program.cs); 8080 is the fallback for plain `docker run`.
 ENV PORT=8080
 EXPOSE 8080

@@ -19,3 +19,8 @@ services:
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
+      # Also set in the Dockerfile; repeated here so it is visible and adjustable from the
+      # Render dashboard. Without it the app can die at startup once the host runs out of
+      # inotify instances. See the comment in the Dockerfile.
+      - key: DOTNET_USE_POLLING_FILE_WATCHER
+        value: "1"

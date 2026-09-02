@@ -6,7 +6,7 @@
 три вещи, которые без него не работают: личную коллекцию карточек, бесконечную прокрутку
 и живую ленту событий.
 
-**Живое демо:** _замените на свой URL после деплоя_ · **Репозиторий:** https://github.com/kirnbas/harry-potter-explorer
+**Живое демо:** https://harry-potter-explorer-mm3q.onrender.com/ · **Репозиторий:** https://github.com/kirnbas/harry-potter-explorer
 
 ---
 

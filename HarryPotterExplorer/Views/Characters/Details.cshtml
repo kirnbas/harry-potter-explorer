@@ -1,0 +1,149 @@
+@model CharacterDetailViewModel
+@{
+    var c = Model.Character;
+    var house = Model.House;
+    ViewData["Title"] = c.Name;
+    ViewData["Description"] = $"{c.Name} — {(house?.Name ?? "unsorted")}, patronus {(c.Patronus ?? "unknown")}.";
+
+    var hasWand = !string.IsNullOrWhiteSpace(c.WandWood)
+                  || !string.IsNullOrWhiteSpace(c.WandCore)
+                  || c.WandLength is > 0;
+
+    // Assembled here so the punctuation does not pick up stray whitespace from Razor.
+    var wandParts = new List<string>();
+
+    if (!string.IsNullOrWhiteSpace(c.WandWood) || !string.IsNullOrWhiteSpace(c.WandCore))
+    {
+        var wood = string.IsNullOrWhiteSpace(c.WandWood) ? "Unknown wood" : c.WandWood;
+        wandParts.Add(string.IsNullOrWhiteSpace(c.WandCore)
+            ? wood
+            : $"{wood} with a {c.WandCore} core");
+    }
+
+    if (c.WandLength is > 0)
+    {
+        wandParts.Add($"{c.WandLength.Value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)} inches");
+    }
+
+    var wandText = string.Join(", ", wandParts);
+}
+
+<div class="shell stack">
+    <p class="small muted">
+        <a href="/characters">← Back to the register</a>
+        @if (house is not null)
+        {
+            <span> · </span>
+            <a href="/houses/@house.Slug">@house.Name</a>
+        }
+    </p>
+
+    <div class="detail">
+        <div class="stack">
+            <div class="frame">
+                @if (!string.IsNullOrWhiteSpace(c.ImageUrl))
+                {
+                    <img class="portrait-img" src="@c.ImageUrl" alt="Portrait of @c.Name" />
+                }
+                else
+                {
+                    <div class="no-portrait" aria-hidden="true">🪄</div>
+                }
+            </div>
+
+            <button type="button"
+                    class="btn btn-primary"
+                    style="width:100%; justify-content:center"
+                    data-collect="@c.Id"
+                    data-name="@c.Name"
+                    aria-pressed="false">
+                🐸 <span>Keep this card</span>
+            </button>
+
+            <p class="small muted center">
+                Held by @c.CollectCount visitor@(c.CollectCount == 1 ? "" : "s") right now.
+                <a href="/live">See the ledger</a>.
+            </p>
+        </div>
+
+        <div class="stack">
+            <div>
+                <h1 style="margin-bottom:.35rem">@c.Name</h1>
+
+                @if (c.AlternateNames.Count > 0)
+                {
+                    <p class="muted" style="font-family:var(--serif); font-style:italic">
+                        also known as @string.Join(", ", c.AlternateNames)
+                    </p>
+                }
+
+                <div class="badges">
+                    @if (house is not null)
+                    {
+                        <span class="badge" style="background:@house.PrimaryColour; border-color:transparent">
+                            @house.Crest @house.Name
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge">Unsorted</span>
+                    }
+
+                    <span class="badge @(c.Alive ? "alive" : "deceased")">@(c.Alive ? "Alive" : "Deceased")</span>
+
+                    @if (c.HogwartsStudent) { <span class="badge gold">Hogwarts student</span> }
+                    @if (c.HogwartsStaff) { <span class="badge gold">Hogwarts staff</span> }
+                    @if (c.Wizard) { <span class="badge">Wizard</span> }
+                    @if (!string.IsNullOrWhiteSpace(c.Species)) { <span class="badge">@c.Species</span> }
+                </div>
+            </div>
+
+            @if (hasWand)
+            {
+                <div class="wand-card">
+                    <div class="tiny" style="color:var(--gold)">Wand</div>
+                    <div style="font-family:var(--serif); font-size:1.15rem">@wandText</div>
+                </div>
+            }
+
+            <section class="panel">
+                <dl class="facts">
+                    <div><dt>Patronus</dt><dd>@(c.Patronus ?? "Unknown")</dd></div>
+                    <div><dt>Ancestry</dt><dd>@(c.Ancestry ?? "Unrecorded")</dd></div>
+                    <div><dt>Gender</dt><dd>@(c.Gender ?? "Unrecorded")</dd></div>
+                    <div><dt>Date of birth</dt><dd>@(c.DateOfBirth ?? (c.YearOfBirth?.ToString() ?? "Unknown"))</dd></div>
+                    <div><dt>Eye colour</dt><dd>@(c.EyeColour ?? "Unrecorded")</dd></div>
+                    <div><dt>Hair colour</dt><dd>@(c.HairColour ?? "Unrecorded")</dd></div>
+                    <div><dt>Portrayed by</dt><dd>@(c.Actor ?? "Not cast")</dd></div>
+                    @if (c.AlternateActors.Count > 0)
+                    {
+                        <div><dt>Also played by</dt><dd>@string.Join(", ", c.AlternateActors)</dd></div>
+                    }
+                </dl>
+            </section>
+
+            @if (house is not null)
+            {
+                <section class="panel" style="border-color:@house.PrimaryColour">
+                    <h3 style="margin-bottom:.35rem">@house.Crest @house.Name</h3>
+                    <p class="muted small" style="margin:0">@house.Motto Common room: @house.CommonRoom.</p>
+                </section>
+            }
+        </div>
+    </div>
+
+    @if (Model.HouseMates.Count > 0 && house is not null)
+    {
+        <section class="section">
+            <div class="section-head">
+                <h2>Others in @house.Name</h2>
+                <a class="btn btn-ghost btn-sm" href="/characters?house=@house.Name">See the whole house →</a>
+            </div>
+            <div class="grid">
+                <partial name="_CharacterCards" model="Model.HouseMates" />
+            </div>
+        </section>
+    }
+</div>
+
+<div class="visually-hidden" role="status" aria-live="polite" data-live-region></div>

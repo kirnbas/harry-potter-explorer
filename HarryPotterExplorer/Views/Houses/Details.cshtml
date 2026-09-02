@@ -1,0 +1,64 @@
+@model HouseDetailViewModel
+@{
+    var house = Model.House;
+    ViewData["Title"] = house.Name;
+    ViewData["Description"] = house.Motto;
+}
+
+<div class="shell stack">
+    <p class="small muted"><a href="/houses">← All houses</a></p>
+
+    <header class="house-banner" style="--h1:@house.PrimaryColour; --h2:@house.SecondaryColour">
+        <div class="crest" aria-hidden="true">@house.Crest</div>
+        <h1>@house.Name</h1>
+        <p class="motto" style="font-family:var(--serif); font-style:italic; font-size:1.1rem">@house.Motto</p>
+        <div class="traits">
+            @foreach (var trait in house.Traits)
+            {
+                <span class="chip">@trait</span>
+            }
+        </div>
+    </header>
+
+    <section class="panel">
+        <p style="font-size:1.05rem">@house.Description</p>
+
+        <dl class="facts">
+            <div><dt>Founder</dt><dd>@house.Founder</dd></div>
+            <div><dt>House ghost</dt><dd>@house.Ghost</dd></div>
+            <div><dt>Head of house</dt><dd>@house.HeadOfHouse</dd></div>
+            <div><dt>Element</dt><dd>@house.Element</dd></div>
+            <div><dt>Symbol</dt><dd>@house.AnimalSymbol</dd></div>
+            <div><dt>Colours</dt>
+                <dd>
+                    <span class="badge" style="background:@house.PrimaryColour; border-color:transparent">@house.PrimaryColour</span>
+                    <span class="badge" style="background:@house.SecondaryColour; border-color:transparent; color:#1b1710">@house.SecondaryColour</span>
+                </dd>
+            </div>
+            <div style="grid-column:1/-1"><dt>Common room</dt><dd>@house.CommonRoom</dd></div>
+            <div><dt>Members on record</dt><dd>@Model.MemberCount</dd></div>
+        </dl>
+    </section>
+
+    <section class="section">
+        <div class="section-head">
+            <h2>Members of @house.Name</h2>
+            <a class="btn btn-ghost btn-sm" href="/characters?house=@house.Name">See all @Model.MemberCount →</a>
+        </div>
+
+        @if (Model.Members.Count == 0)
+        {
+            <div class="notice empty">
+                No members on record yet — the library is still copying the school register.
+            </div>
+        }
+        else
+        {
+            <div class="grid">
+                <partial name="_CharacterCards" model="Model.Members" />
+            </div>
+        }
+    </section>
+</div>
+
+<div class="visually-hidden" role="status" aria-live="polite" data-live-region></div>

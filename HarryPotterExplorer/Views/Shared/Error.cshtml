@@ -1,0 +1,23 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = Model.StatusCode.ToString();
+}
+
+<div class="shell center" style="padding:4rem 0">
+    <div style="font-size:4.5rem; line-height:1" aria-hidden="true">🕯️</div>
+    <p class="eyebrow">Error @Model.StatusCode</p>
+    <h1>@Model.Title</h1>
+    <p class="muted" style="max-width:52ch; margin-inline:auto">@Model.Message</p>
+
+    <p style="margin-top:1.5rem">
+        <a class="btn btn-primary" href="/">Back to the Great Hall</a>
+        <a class="btn btn-ghost" href="/characters">Search the register</a>
+    </p>
+
+    @if (Model.ShowRequestId)
+    {
+        <p class="small muted" style="margin-top:2rem">
+            Request id: <code>@Model.RequestId</code>
+        </p>
+    }
+</div>

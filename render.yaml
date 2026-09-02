@@ -1,0 +1,21 @@
+# Render blueprint. Point Render at this repository and it builds the Dockerfile and
+# injects PORT; Program.cs listens on whatever PORT it is given.
+#
+# The free plan has no persistent disk, so /app/App_Data is ephemeral: after a redeploy
+# (or a cold start) the database is recreated and re-seeded from the public API within a
+# minute, and only the shared collection tally is lost. On a paid plan, add:
+#
+#   disk:
+#     name: hogwarts-data
+#     mountPath: /app/App_Data
+#     sizeGB: 1
+services:
+  - type: web
+    name: harry-potter-explorer
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/sync
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production

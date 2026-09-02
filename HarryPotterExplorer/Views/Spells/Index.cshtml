@@ -1,0 +1,56 @@
+@model SpellsIndexViewModel
+@{
+    ViewData["Title"] = "The Spellbook";
+    ViewData["Description"] = "Every charm, curse, jinx and hex on record, searchable by name and effect.";
+}
+
+<div class="shell">
+    <header class="page-head">
+        <p class="eyebrow">Standard Book of Spells</p>
+        <h1>The Spellbook</h1>
+        <p>
+            @Model.FirstPage.TotalCount incantations, mirrored from the public API and then sorted
+            into charms, curses, jinxes and hexes by this application &mdash; the upstream data has
+            no category field, so the classification is ours. Search matches the name and the effect.
+        </p>
+    </header>
+
+    <form class="filters" data-spell-filters role="search">
+        <div class="field grow">
+            <label for="s-search">Search spells</label>
+            <input id="s-search" type="search" name="search" value="@Model.Search"
+                   placeholder="Expecto, unlock a door, patronus&hellip;" autocomplete="off" />
+        </div>
+
+        <div class="field">
+            <label for="s-category">Type</label>
+            <select id="s-category" name="category">
+                <option value="">All types</option>
+                @foreach (var category in Model.Categories)
+                {
+                    <option value="@category" selected="@(Model.Category == category)">@category</option>
+                }
+            </select>
+        </div>
+
+        <noscript><button class="btn btn-sm" type="submit">Search</button></noscript>
+    </form>
+
+    <div class="result-line">
+        <span data-spell-status>
+            @(Model.FirstPage.TotalCount == 1 ? "1 spell" : $"{Model.FirstPage.TotalCount} spells")
+        </span>
+        <span class="small">Pronounce carefully. It is Levi-<em>o</em>-sa.</span>
+    </div>
+
+    <div class="spell-list" data-spell-list>
+        @if (Model.FirstPage.Items.Count == 0)
+        {
+            <div class="notice empty">No spell by that name. Check your pronunciation.</div>
+        }
+        else
+        {
+            <partial name="_SpellRows" model="Model.FirstPage.Items" />
+        }
+    </div>
+</div>

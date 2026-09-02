@@ -1,0 +1,29 @@
+## Build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+publish/
+*.user
+*.suo
+*.userprefs
+
+## IDE
+.vs/
+.vscode/
+.idea/
+*.swp
+
+## Local database (recreated and re-seeded on first run)
+App_Data/
+*.db
+*.db-shm
+*.db-wal
+
+## Local secrets and environment overrides
+appsettings.Local.json
+.env
+
+## OS noise
+.DS_Store
+Thumbs.db

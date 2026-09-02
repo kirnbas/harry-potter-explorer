@@ -1,0 +1,9 @@
+@model IEnumerable<SpellSummary>
+@foreach (var spell in Model)
+{
+    <article class="spell" data-category="@spell.Category">
+        <span class="incantation">@spell.Name</span>
+        <span class="desc">@(string.IsNullOrWhiteSpace(spell.Description) ? "Effect unrecorded." : spell.Description)</span>
+        <span class="tag">@spell.Category</span>
+    </article>
+}

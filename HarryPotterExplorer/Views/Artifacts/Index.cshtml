@@ -1,0 +1,78 @@
+@model ArtifactsIndexViewModel
+@{
+    ViewData["Title"] = "The Artefact Vault";
+    ViewData["Description"] = "Deathly Hallows, Horcruxes, brooms and other objects best not left lying around.";
+}
+
+<div class="shell">
+    <header class="page-head">
+        <p class="eyebrow">Restricted section</p>
+        <h1>The Artefact Vault</h1>
+        <p>
+            The public Harry Potter API has characters and spells but no artefacts, so this
+            collection is curated by hand and shipped with the app as JSON, then loaded into the
+            same database as everything else. @Model.Artifacts.Count objects, ranked by how much
+            trouble they are.
+        </p>
+    </header>
+
+    <form class="filters" role="search" onsubmit="return false">
+        <div class="field grow">
+            <label for="a-search">Search the vault</label>
+            <input id="a-search" type="search" data-artifact-search value="@Model.Search"
+                   placeholder="Horcrux, broom, Dumbledore&hellip;" autocomplete="off" />
+        </div>
+
+        <div class="field">
+            <label for="a-category">Category</label>
+            <select id="a-category" data-artifact-category>
+                <option value="">All categories</option>
+                @foreach (var category in Model.Categories)
+                {
+                    <option value="@category" selected="@(Model.Category == category)">@category</option>
+                }
+            </select>
+        </div>
+    </form>
+
+    <div class="result-line">
+        <span data-artifact-status>@Model.Artifacts.Count artefacts</span>
+        <span class="small">★ = how badly you should want it. ★★★★★ = do not touch it.</span>
+    </div>
+
+    <div class="grid grid-wide" data-artifact-grid>
+        @foreach (var artifact in Model.Artifacts)
+        {
+            <article class="artifact"
+                     data-artifact
+                     data-category="@artifact.Category"
+                     data-search="@($"{artifact.Name} {artifact.Category} {artifact.Description} {artifact.Owner} {artifact.FirstAppearance}".ToLowerInvariant())">
+                <div class="row between">
+                    <span class="glyph" aria-hidden="true">@artifact.Glyph</span>
+                    <span class="tag">@artifact.Category</span>
+                </div>
+
+                <h3>@artifact.Name</h3>
+                <div class="rarity" aria-label="Rarity @artifact.Rarity of 5">@(new string('★', artifact.Rarity))</div>
+
+                <p style="margin:0">@artifact.Description</p>
+
+                @if (!string.IsNullOrWhiteSpace(artifact.Lore))
+                {
+                    <p class="lore" style="margin:0">@artifact.Lore</p>
+                }
+
+                <dl class="facts" style="margin-top:auto">
+                    @if (!string.IsNullOrWhiteSpace(artifact.Owner))
+                    {
+                        <div><dt>Keeper</dt><dd class="small">@artifact.Owner</dd></div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(artifact.FirstAppearance))
+                    {
+                        <div><dt>First seen in</dt><dd class="small">@artifact.FirstAppearance</dd></div>
+                    }
+                </dl>
+            </article>
+        }
+    </div>
+</div>

@@ -1,0 +1,45 @@
+@{
+    ViewData["Title"] = "Your Album";
+    ViewData["Description"] = "The Chocolate Frog Cards you have collected, stored in this browser.";
+}
+
+<div class="shell">
+    <header class="page-head">
+        <p class="eyebrow">Chocolate Frog Cards</p>
+        <h1>Your Album</h1>
+        <p>
+            Cards you keep are stored in <strong>this browser only</strong> — there is no account and
+            nothing to sign in to. The server is told that <em>somebody</em> collected a card, so the
+            <a href="/live">live ledger</a> can show a running tally, but the list itself never leaves
+            your device.
+        </p>
+    </header>
+
+    <div class="result-line">
+        <span data-collection-summary>Loading your album&hellip;</span>
+        <button class="btn btn-ghost btn-sm" type="button" data-clear-collection>Empty the album</button>
+    </div>
+
+    <div class="notice empty" data-collection-empty hidden>
+        <div>
+            <p style="margin:0 0 .75rem">
+                No cards yet. Every card in the castle has a 🐸 button — press it and the card lands here.
+            </p>
+            <a class="btn btn-primary btn-sm" href="/characters">Go and find some</a>
+        </div>
+    </div>
+
+    <div class="grid" data-collection-grid></div>
+
+    <noscript>
+        <div class="notice warn" style="margin-top:1.5rem">
+            The album is stored in your browser and needs JavaScript to read it.
+        </div>
+    </noscript>
+</div>
+
+<div class="visually-hidden" role="status" aria-live="polite" data-live-region></div>
+
+@section Scripts {
+    <script>document.body.setAttribute("data-collection-page", "");</script>
+}

@@ -1,0 +1,63 @@
+@{
+    ViewData["Title"] = "About this build";
+    ViewData["Description"] = "How Harry Potter Explorer is put together.";
+}
+
+<div class="shell stack" style="max-width:900px">
+    <header class="page-head">
+        <p class="eyebrow">Colophon</p>
+        <h1>About this build</h1>
+        <p>
+            Harry Potter Explorer is an ASP.NET Core MVC application. It has no client framework,
+            no build step and no external service calls from the browser.
+        </p>
+    </header>
+
+    <section class="panel">
+        <h2>Where the data comes from</h2>
+        <p>
+            Characters and spells are read from the public
+            <a href="https://hp-api.onrender.com/" rel="noopener noreferrer" target="_blank">hp-api.onrender.com</a>
+            by a background service on the server, then written into a local SQLite database. Pages
+            and the JSON API read that database, never the upstream host. That is why the site keeps
+            working when the upstream instance is asleep, and why searching feels instant.
+        </p>
+        <p>
+            House lore and the artefact vault have no upstream source. They are curated content kept
+            in the repository — a C# catalogue for the houses, a JSON file for the artefacts — and
+            loaded into the same database on start.
+        </p>
+    </section>
+
+    <section class="panel">
+        <h2>Your collection</h2>
+        <p>
+            The cards you keep live in your browser&rsquo;s <code>localStorage</code>. The server is told
+            only that a card was collected or released, tagged with an anonymous per-browser id so one
+            visitor cannot inflate the public tally. There is no account, no email and nothing to log in to.
+        </p>
+    </section>
+
+    <section class="panel">
+        <h2>The public API</h2>
+        <p>Everything the pages use is available as JSON:</p>
+        <ul class="small">
+            <li><a href="/api/characters?pageSize=5"><code>GET /api/characters</code></a> — search, filter, page</li>
+            <li><code>GET /api/characters/{id}</code> — one character in full</li>
+            <li><a href="/api/spells?pageSize=5"><code>GET /api/spells</code></a> — the spellbook</li>
+            <li><a href="/api/artifacts"><code>GET /api/artifacts</code></a> — the vault</li>
+            <li><a href="/api/houses"><code>GET /api/houses</code></a> — house lore with member counts</li>
+            <li><a href="/api/stats"><code>GET /api/stats</code></a> — live aggregates and mirror status</li>
+            <li><code>POST /api/sync</code> — ask for an out-of-band refresh</li>
+        </ul>
+    </section>
+
+    <section class="panel">
+        <h2>Credits</h2>
+        <p class="small muted">
+            A fan-made, non-commercial study project. The wizarding world, its names and its
+            characters belong to their respective rights holders. Character images are served from
+            the upstream API&rsquo;s own image host.
+        </p>
+    </section>
+</div>

@@ -1,0 +1,49 @@
+@model SortingHatViewModel
+@{
+    ViewData["Title"] = "The Sorting Hat";
+    ViewData["Description"] = "Seven questions and a very old hat decide where you belong.";
+}
+
+<div class="shell">
+    <header class="page-head center">
+        <div style="font-size:4rem; line-height:1" aria-hidden="true">🎩</div>
+        <p class="eyebrow">A thousand years of practice</p>
+        <h1>The Sorting Hat</h1>
+        <p style="margin-inline:auto">
+            Answer honestly. The Hat takes your preference into account, which is not cheating —
+            it is how the Hat has always worked. Scoring happens on the server, so reading this
+            page will not tell you which answer leads where.
+        </p>
+    </header>
+
+    <form class="quiz panel" data-sorting-hat>
+        @foreach (var question in Model.Questions)
+        {
+            <fieldset class="question" style="border:0; padding:0; margin-bottom:2rem">
+                <legend style="padding:0"><h3 style="margin:0 0 .85rem">@question.Prompt</h3></legend>
+                <div class="answers">
+                    @foreach (var option in question.Options)
+                    {
+                        var inputId = $"{question.Id}-{option.Id}";
+                        <label class="answer" for="@inputId">
+                            <input id="@inputId" type="radio" name="@question.Id" value="@option.Id" required />
+                            <span>@option.Text</span>
+                        </label>
+                    }
+                </div>
+            </fieldset>
+        }
+
+        <div class="center">
+            <button class="btn btn-primary" type="submit" data-sorting-submit>Put on the Hat</button>
+        </div>
+    </form>
+
+    <div class="quiz" data-sorting-result style="margin-top:2rem"></div>
+
+    <noscript>
+        <div class="notice warn" style="margin-top:1.5rem">
+            The Hat needs JavaScript to speak. Everything else on this site works without it.
+        </div>
+    </noscript>
+</div>

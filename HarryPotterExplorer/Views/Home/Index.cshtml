@@ -1,0 +1,167 @@
+@model HomeViewModel
+@{
+    ViewData["Title"] = "The Great Hall";
+    ViewData["Description"] = "Explore Hogwarts houses, characters, spells and magical artefacts.";
+    var sync = Model.Stats.Sync;
+}
+
+<section class="hero">
+    <div class="candles" data-candles aria-hidden="true"></div>
+    <div class="shell">
+        <p class="eyebrow">Hogwarts School of Witchcraft and Wizardry</p>
+        <h1>Welcome to the Great Hall</h1>
+        <p class="lede">
+            The candles are lit, the ceiling is showing tonight&rsquo;s sky, and the Sorting Hat is
+            in a talkative mood. Wander through the four houses, look up @Model.Stats.Characters
+            witches, wizards and other creatures, learn @Model.Stats.Spells spells, and inspect
+            @Model.Stats.Artifacts artefacts that probably should not be left lying around.
+        </p>
+
+        <div class="hero-actions">
+            <a class="btn btn-primary" href="/characters">Browse the characters</a>
+            <a class="btn" href="/sorting-hat">Let the Hat sort you</a>
+            <a class="btn btn-ghost" href="/houses">The four houses</a>
+        </div>
+
+        <svg class="castle" viewBox="0 0 1200 240" role="img" aria-label="Silhouette of Hogwarts castle">
+            <defs>
+                <linearGradient id="castleFade" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#171d36" />
+                    <stop offset="100%" stop-color="#05060d" />
+                </linearGradient>
+            </defs>
+            <g fill="url(#castleFade)">
+                <path d="M0 240 L0 176 L46 176 L46 150 L64 122 L82 150 L82 176 L128 176 L128 132 L150 96 L172 132 L172 176 L214 176 L214 116 L240 70 L266 116 L266 176 L318 176 L318 148 L340 112 L362 148 L362 176 L420 176 L420 104 L448 52 L476 104 L476 176 L540 176 L540 138 L562 100 L584 138 L584 176 L640 176 L640 88 L672 30 L704 88 L704 176 L760 176 L760 130 L782 94 L804 130 L804 176 L862 176 L862 110 L890 60 L918 110 L918 176 L968 176 L968 146 L988 112 L1008 146 L1008 176 L1060 176 L1060 126 L1086 82 L1112 126 L1112 176 L1156 176 L1156 154 L1174 124 L1192 154 L1192 176 L1200 176 L1200 240 Z" />
+            </g>
+            <g fill="#e8c86b" opacity="0.55">
+                <rect x="60" y="160" width="5" height="8" /><rect x="146" y="146" width="5" height="9" />
+                <rect x="236" y="128" width="6" height="10" /><rect x="336" y="158" width="5" height="8" />
+                <rect x="444" y="118" width="6" height="11" /><rect x="558" y="148" width="5" height="9" />
+                <rect x="668" y="100" width="7" height="12" /><rect x="778" y="140" width="5" height="9" />
+                <rect x="886" y="122" width="6" height="10" /><rect x="984" y="156" width="5" height="8" />
+                <rect x="1082" y="134" width="6" height="10" /><rect x="1170" y="160" width="5" height="8" />
+            </g>
+        </svg>
+    </div>
+</section>
+
+<div class="shell">
+    @if (sync.State is "syncing" or "idle" && Model.Stats.Characters == 0)
+    {
+        <div class="notice">
+            <span aria-hidden="true">🦉</span>
+            <div>
+                <strong>The owls are still flying.</strong>
+                The castle records are being copied from the public Harry Potter API right now.
+                That service sleeps when idle, so the first fetch after a cold start can take up to a minute.
+                Refresh in a moment.
+            </div>
+        </div>
+    }
+    else if (sync.State is "failed" or "stale" && sync.Error is not null)
+    {
+        <div class="notice warn">
+            <span aria-hidden="true">⚠️</span>
+            <div>
+                <strong>The last owl did not make it back.</strong>
+                Showing the records already in the castle library.
+                <span class="muted small">(@sync.Error)</span>
+            </div>
+        </div>
+    }
+
+    <section class="section">
+        <div class="section-head">
+            <h2>The four houses</h2>
+            <a class="btn btn-ghost btn-sm" href="/houses">All house lore →</a>
+        </div>
+
+        <div class="grid grid-2">
+            @foreach (var entry in Model.Houses)
+            {
+                <a class="house-card" href="/houses/@entry.House.Slug"
+                   style="--h1:@entry.House.PrimaryColour; --h2:@entry.House.SecondaryColour">
+                    <div class="crest" aria-hidden="true">@entry.House.Crest</div>
+                    <h3>@entry.House.Name</h3>
+                    <div class="motto">@entry.House.Motto</div>
+                    <div class="traits">
+                        @foreach (var trait in entry.House.Traits)
+                        {
+                            <span class="chip">@trait</span>
+                        }
+                    </div>
+                    <p class="small muted" style="margin-top:.9rem">
+                        @entry.MemberCount known member@(entry.MemberCount == 1 ? "" : "s") on record
+                    </p>
+                </a>
+            }
+        </div>
+    </section>
+
+    @if (Model.Featured.Count > 0)
+    {
+        <section class="section">
+            <div class="section-head">
+                <h2>Familiar faces</h2>
+                <a class="btn btn-ghost btn-sm" href="/characters">Search all @Model.Stats.Characters →</a>
+            </div>
+            <div class="grid">
+                <partial name="_CharacterCards" model="Model.Featured" />
+            </div>
+            <p class="small muted" style="margin-top:1rem">
+                Tap the 🐸 on any card to keep it in your album. Cards live in your browser;
+                only the running tally is shared with the <a href="/live">live ledger</a>.
+            </p>
+        </section>
+    }
+
+    @if (Model.FeaturedArtifacts.Count > 0)
+    {
+        <section class="section">
+            <div class="section-head">
+                <h2>The Deathly Hallows</h2>
+                <a class="btn btn-ghost btn-sm" href="/artifacts">The whole vault →</a>
+            </div>
+            <div class="grid grid-wide">
+                @foreach (var artifact in Model.FeaturedArtifacts)
+                {
+                    <article class="artifact">
+                        <div class="glyph" aria-hidden="true">@artifact.Glyph</div>
+                        <h3>@artifact.Name</h3>
+                        <div class="rarity" aria-label="Rarity @artifact.Rarity of 5">@(new string('★', artifact.Rarity))</div>
+                        <p class="small">@artifact.Description</p>
+                    </article>
+                }
+            </div>
+        </section>
+    }
+
+    <section class="section">
+        <div class="panel">
+            <div class="stat-row">
+                <div class="stat">
+                    <div class="value">@Model.Stats.Characters</div>
+                    <div class="label">Characters</div>
+                </div>
+                <div class="stat">
+                    <div class="value">@Model.Stats.Spells</div>
+                    <div class="label">Spells</div>
+                </div>
+                <div class="stat">
+                    <div class="value">@Model.Stats.Artifacts</div>
+                    <div class="label">Artefacts</div>
+                </div>
+                <div class="stat">
+                    <div class="value">@Model.Stats.CollectedTotal</div>
+                    <div class="label">Cards collected</div>
+                </div>
+            </div>
+            <p class="small muted center" style="margin:1.25rem 0 0">
+                Every number here comes from this app&rsquo;s own database, filled server-side from the
+                public Harry Potter API. Watch it change on the <a href="/live">live page</a>.
+            </p>
+        </div>
+    </section>
+</div>
+
+<div class="visually-hidden" role="status" aria-live="polite" data-live-region></div>

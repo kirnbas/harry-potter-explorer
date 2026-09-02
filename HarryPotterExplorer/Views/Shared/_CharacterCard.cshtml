@@ -1,0 +1,42 @@
+@model CharacterSummary
+@{
+    var houseSlug = string.IsNullOrWhiteSpace(Model.House) ? "unsorted" : Model.House.ToLowerInvariant();
+    var houseLabel = string.IsNullOrWhiteSpace(Model.House) ? "Unsorted" : Model.House;
+}
+<article class="char-card" data-character-id="@Model.Id" data-character-name="@Model.Name">
+    <span class="house-spine @houseSlug" aria-hidden="true"></span>
+
+    <button type="button"
+            class="collect-btn"
+            data-collect="@Model.Id"
+            data-name="@Model.Name"
+            aria-pressed="false"
+            title="Add to your collection"
+            aria-label="Add @Model.Name to your collection">🐸</button>
+
+    <div class="portrait">
+        @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+        {
+            <img class="portrait-img" src="@Model.ImageUrl" alt="Portrait of @Model.Name" loading="lazy" decoding="async" />
+        }
+        else
+        {
+            <div class="no-portrait" aria-hidden="true">🪄</div>
+        }
+    </div>
+
+    <div class="body">
+        <h3 class="name"><a href="/characters/@Model.Id">@Model.Name</a></h3>
+        <div class="meta">
+            @houseLabel@(string.IsNullOrWhiteSpace(Model.Species) ? "" : $" · {Model.Species}")
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.Patronus))
+        {
+            <div class="patronus">Patronus: @Model.Patronus</div>
+        }
+        else
+        {
+            <div class="patronus muted">Patronus unknown</div>
+        }
+    </div>
+</article>

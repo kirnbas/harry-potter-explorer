@@ -1,0 +1,133 @@
+@model LiveViewModel
+@{
+    ViewData["Title"] = "The Great Hall Ledger";
+    ViewData["Description"] = "Watch the application database change in real time over SignalR.";
+
+    var stats = Model.Stats;
+    var houseTotal = stats.ByHouse.Values.Sum();
+    var maxHouse = stats.ByHouse.Values.DefaultIfEmpty(1).Max();
+
+    string SyncLabel(string state) => state switch
+    {
+        "ready" => "Mirror up to date",
+        "syncing" => "Copying records from the public API…",
+        "stale" => "Upstream unreachable — showing stored records",
+        "failed" => "Upstream unreachable and nothing stored yet",
+        _ => "Waiting for the first refresh"
+    };
+}
+
+<div class="shell stack">
+    <header class="page-head">
+        <p class="eyebrow">Live database</p>
+        <h1>The Great Hall Ledger</h1>
+        <p>
+            Every page on this site is served from the application&rsquo;s own SQLite database, filled
+            server-side from the public Harry Potter API. This page opens a SignalR connection and
+            shows the rows changing as they change — collect a card in another tab and watch it appear.
+        </p>
+    </header>
+
+    <div class="row between">
+        <span><span class="live-dot off" data-connection-dot></span><span data-connection-label>Connecting…</span></span>
+        <button class="btn btn-ghost btn-sm" type="button" data-refresh-mirror>Refresh from the public API</button>
+    </div>
+
+    <div class="stat-row">
+        <div class="stat"><div class="value" data-stat="characters">@stats.Characters</div><div class="label">Characters</div></div>
+        <div class="stat"><div class="value" data-stat="spells">@stats.Spells</div><div class="label">Spells</div></div>
+        <div class="stat"><div class="value" data-stat="artifacts">@stats.Artifacts</div><div class="label">Artefacts</div></div>
+        <div class="stat"><div class="value" data-stat="collected">@stats.CollectedTotal</div><div class="label">Cards collected</div></div>
+    </div>
+
+    <div class="notice" data-sync-notice>
+        <span aria-hidden="true">🦉</span>
+        <div>
+            <strong data-sync-label>@SyncLabel(stats.Sync.State)</strong>
+            <div class="small muted" data-sync-detail>
+                @if (stats.Sync.LastCompletedUtc is { } completed)
+                {
+                    <text>Last refresh @completed.ToString("u") · @stats.Sync.CharactersUpserted characters, @stats.Sync.SpellsUpserted spells.</text>
+                }
+                else
+                {
+                    <text>No completed refresh yet in this process.</text>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-2">
+        <section class="panel">
+            <h2>Characters by house</h2>
+            <div class="bar-row">
+                @foreach (var pair in stats.ByHouse.OrderByDescending(p => p.Value))
+                {
+                    var slug = pair.Key.ToLowerInvariant();
+                    var width = maxHouse == 0 ? 0 : pair.Value * 100 / maxHouse;
+                    <div class="bar">
+                        <span>@pair.Key</span>
+                        <span class="track"><span class="fill @(slug is "gryffindor" or "slytherin" or "hufflepuff" or "ravenclaw" ? slug : "other")" style="width:@(width)%"></span></span>
+                        <span class="num">@pair.Value</span>
+                    </div>
+                }
+            </div>
+            <p class="small muted" style="margin:1rem 0 0">
+                @houseTotal of @stats.Characters characters have a house on record.
+            </p>
+        </section>
+
+        <section class="panel">
+            <h2>Most collected</h2>
+            <div class="bar-row" data-top-collected>
+                @if (stats.TopCollected.Count == 0)
+                {
+                    <p class="muted small">Nobody has kept a card yet. Be the first — the ledger updates instantly.</p>
+                }
+                else
+                {
+                    var top = stats.TopCollected.Max(t => t.CollectCount);
+                    @foreach (var entry in stats.TopCollected)
+                    {
+                        var slug = string.IsNullOrWhiteSpace(entry.House) ? "other" : entry.House.ToLowerInvariant();
+                        <div class="bar">
+                            <span><a href="/characters/@entry.Id">@entry.Name</a></span>
+                            <span class="track"><span class="fill @(slug is "gryffindor" or "slytherin" or "hufflepuff" or "ravenclaw" ? slug : "other")" style="width:@(top == 0 ? 0 : entry.CollectCount * 100 / top)%"></span></span>
+                            <span class="num">@entry.CollectCount</span>
+                        </div>
+                    }
+                }
+            </div>
+        </section>
+    </div>
+
+    <section class="panel">
+        <div class="section-head" style="margin-bottom:1rem">
+            <h2 style="margin:0">Ledger</h2>
+            <span class="small muted">Newest first · appended on every collect and release</span>
+        </div>
+
+        <div class="ledger" data-ledger>
+            @if (stats.RecentEvents.Count == 0)
+            {
+                <div class="notice empty">The ledger is empty. Nothing has been collected yet.</div>
+            }
+            else
+            {
+                foreach (var entry in stats.RecentEvents)
+                {
+                    <div class="ledger-row @(entry.Action == "released" ? "released" : "")">
+                        <span aria-hidden="true">@(entry.Action == "released" ? "🕊️" : "🐸")</span>
+                        <span><strong>@entry.CharacterName</strong> <span class="verb">@entry.Action</span></span>
+                        <span class="when">@entry.CreatedUtc.ToString("HH:mm:ss") UTC</span>
+                    </div>
+                }
+            }
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
+    <script src="~/js/live.js" asp-append-version="true"></script>
+}

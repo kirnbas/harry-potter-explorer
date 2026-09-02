@@ -1,0 +1,54 @@
+@model HousesIndexViewModel
+@{
+    ViewData["Title"] = "The Four Houses";
+    ViewData["Description"] = "Gryffindor, Slytherin, Hufflepuff and Ravenclaw: colours, symbols, founders and common rooms.";
+    var total = Model.Houses.Sum(h => h.MemberCount);
+}
+
+<div class="shell">
+    <header class="page-head">
+        <p class="eyebrow">Sorted since 990 AD</p>
+        <h1>The Four Houses</h1>
+        <p>
+            Every student who walks into the Great Hall leaves it belonging somewhere. Four founders,
+            four ideas about what a witch or wizard ought to be, and one very opinionated hat.
+            @total characters in the library have a house on record.
+        </p>
+    </header>
+
+    <div class="grid grid-2">
+        @foreach (var entry in Model.Houses)
+        {
+            var house = entry.House;
+            <a class="house-card" href="/houses/@house.Slug"
+               style="--h1:@house.PrimaryColour; --h2:@house.SecondaryColour">
+                <div class="crest" aria-hidden="true">@house.Crest</div>
+                <h3>@house.Name</h3>
+                <div class="motto">@house.Motto</div>
+
+                <p class="small" style="margin-top:.9rem; color:rgba(242,229,201,.82)">@house.Description</p>
+
+                <div class="traits">
+                    @foreach (var trait in house.Traits)
+                    {
+                        <span class="chip">@trait</span>
+                    }
+                </div>
+
+                <div class="row small muted" style="margin-top:1rem; gap:1.25rem">
+                    <span>Founder: @house.Founder</span>
+                    <span>Element: @house.Element</span>
+                    <span>@entry.MemberCount on record</span>
+                </div>
+            </a>
+        }
+    </div>
+
+    <section class="section">
+        <div class="panel center">
+            <h2>Not sure where you belong?</h2>
+            <p class="muted">Seven questions, one hat, no appeals process. (There is a small appeals process.)</p>
+            <a class="btn btn-primary" href="/sorting-hat">Put on the Sorting Hat</a>
+        </div>
+    </section>
+</div>

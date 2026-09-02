@@ -1,0 +1,5 @@
+@model IEnumerable<CharacterSummary>
+@foreach (var character in Model)
+{
+    <partial name="_CharacterCard" model="character" />
+}

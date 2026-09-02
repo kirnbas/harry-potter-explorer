@@ -1,0 +1,71 @@
+@{
+    var path = (Context.Request.Path.Value ?? "/").ToLowerInvariant();
+
+    string NavClass(string prefix) =>
+        prefix == "/"
+            ? (path == "/" ? "is-active" : "")
+            : (path.StartsWith(prefix, StringComparison.Ordinal) ? "is-active" : "");
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="@(ViewData["Description"] ?? "Explore the wizarding world: houses, characters, spells and magical artefacts.")" />
+    <meta name="color-scheme" content="dark" />
+    <title>@ViewData["Title"] · Harry Potter Explorer</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <a class="visually-hidden" href="#main">Skip to content</a>
+
+    <header class="site-header">
+        <div class="shell">
+            <a class="brand" asp-controller="Home" asp-action="Index">
+                <span class="sigil" aria-hidden="true">⚡</span>
+                <span>Harry Potter Explorer</span>
+            </a>
+
+            <nav class="nav" aria-label="Main">
+                <a class="@NavClass("/")" asp-controller="Home" asp-action="Index">Great Hall</a>
+                <a class="@NavClass("/houses")" href="/houses">Houses</a>
+                <a class="@NavClass("/characters")" href="/characters">Characters</a>
+                <a class="@NavClass("/spells")" href="/spells">Spellbook</a>
+                <a class="@NavClass("/artifacts")" href="/artifacts">Artefacts</a>
+                <a class="@NavClass("/sorting-hat")" href="/sorting-hat">Sorting Hat</a>
+                <a class="@NavClass("/collection")" href="/collection">
+                    Collection<span class="count-pill" data-collection-count data-count="0"></span>
+                </a>
+                <a class="@NavClass("/live")" href="/live">Live</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main">
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer">
+        <div class="shell">
+            <div>
+                <strong>Harry Potter Explorer</strong> — an ASP.NET Core study project.<br />
+                Character and spell data mirrored from
+                <a href="https://hp-api.onrender.com/" rel="noopener noreferrer" target="_blank">hp-api.onrender.com</a>,
+                fetched server-side and stored locally.
+            </div>
+            <div>
+                <a href="/about">About this build</a> ·
+                <a href="/live">Live database</a> ·
+                <a href="/api/stats">API</a>
+            </div>
+            <div class="small muted">
+                Fan-made and non-commercial. All wizarding-world names and concepts belong to their respective rights holders.
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

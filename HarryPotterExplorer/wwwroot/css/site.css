@@ -250,8 +250,10 @@ main { padding: 2.5rem 0 4rem; }
     filter: drop-shadow(0 -6px 30px rgba(211, 166, 37, 0.22));
 }
 
-/* Floating candles, purely decorative. */
-.candles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.hero > .shell { position: relative; z-index: 1; }
+
+/* Floating candles, purely decorative — and kept behind the text. */
+.candles { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
 
 .candle {
     position: absolute;
